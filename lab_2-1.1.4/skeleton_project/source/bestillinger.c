@@ -20,15 +20,31 @@ void outside_ordercomplete(int outsideorders[], int floor){
 }
 
 void inside_addtoorders(int insideorders[], int floor){
-    
+
 }
 
-int getnextfloor(MotorDirection motordir, int currentfloor){
+int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[], int insideorders[]){
     if(motordir = 1){}
-    for(int i = currentfloor-1 ; i<=5; i++) {
-        if(orders[i] == 1){
-            return i+1;
-        }        
+    int targetfloor;
+    int nextfloor;
+
+    for(int i = 0 ; i<=5; i++) {
+        if(i == 0){targetfloor = 1;}
+        if(i == 1 || i == 2){targetfloor = 2;}
+        if(i == 3 || i == 4){targetfloor = 3;}
+        if(i == 5){targetfloor = 5;}
+
+        if((motordir == 1 && targetfloor <= currentfloor) || (motordir == -1 && targetfloor >= currentfloor)){
+            continue;
+        if((motordir == 1 && targetfloor > currentfloor) || (motordir == -1 && targetfloor < currentfloor)){
+                if (outsideorders[i] == 1){nextfloor = targetfloor;}
+            } 
+        }       
+    }
+    if(motordir == 1){
+        for(int i = 0; i <= 4, i++){
+            if((i > currentfloor) && (insideorders[i] == 1) && (i < nextfloor)){i = nextfloor;}
+        }
     }
 }
 
