@@ -3,7 +3,7 @@
 #include <signal.h>
 #include <time.h>
 #include "driver/elevio.h"
-#include <stdbool.h>
+#include "driver/startup.h"
 
 
 
@@ -12,7 +12,7 @@ int main(){
     
     printf("=== Example Program ===\n");
     printf("Press the stop button on the elevator panel to exit\n");
-    while(startup()!=true){}
+    while(!startup_status()){}
 
     // while(1){
     //     int floor = elevio_floorSensor();

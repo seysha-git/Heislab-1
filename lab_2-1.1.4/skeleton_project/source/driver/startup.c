@@ -1,6 +1,6 @@
 #include "startup.h"
 #include <stdbool.h>
-bool startup(void){
+bool startup_status(void){
     int floor = elevio_floorSensor();
 
     if(floor != -1){
