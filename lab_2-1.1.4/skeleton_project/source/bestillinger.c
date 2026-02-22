@@ -42,7 +42,7 @@ int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[],
         }       
     }
     if(motordir == 1){
-        for(int i = 0; i <= 4, i++){
+        for(int i = 0; i <= 4; i++){
             if((i > currentfloor) && (insideorders[i] == 1) && (i < nextfloor)){i = nextfloor;}
         }
     }
