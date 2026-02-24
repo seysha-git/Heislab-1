@@ -9,10 +9,42 @@
 
 int main(){
     elevio_init();
-    
-    printf("=== Example Program ===\n");
-    printf("Press the stop button on the elevator panel to exit\n");
-    while(startup()!=true){}
+
+    orders_init();
+
+    MotorDirection dir = DIRN_STOP;
+
+    while(1){
+
+        // 1️⃣ Les nye knapper og legg inn ordre
+        orders_poll_buttons(false);
+
+        // 2️⃣ Oppdater bestillingslys
+        lights_set_order_lamps_from_orders();
+
+        // 3️⃣ Les etasjesensor
+        int floor = elevio_floorSensor();
+
+        if(floor != -1){
+            lights_set_floor_indicator(floor);
+
+            // 4️⃣ Sjekk om vi skal stoppe her
+            if(orders_should_stop(floor, dir)){
+                elevio_motorDirection(DIRN_STOP);
+                orders_clear_at_floor(floor);
+
+                lights_set_door_open_lamp(true);
+                // Her bør du egentlig ha en 3 sek timer
+            }
+        }
+
+        // 5️⃣ Velg ny retning hvis vi ikke stopper
+        dir = orders_next_dir(floor, dir);
+        elevio_motorDirection(dir);
+    }
+    // printf("=== Example Program ===\n");
+    // printf("Press the stop button on the elevator panel to exit\n");
+    // while(startup()!=true){}
 
     // while(1){
     //     int floor = elevio_floorSensor();

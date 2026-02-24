@@ -178,33 +178,24 @@
 
 #include <stdbool.h>
 #include <stdlib.h>     // abs
-#include "driver/elevio.h"
+#include "bestillinger.h"
 
 // Intern ordretilstand
-// ---------------------------
-// orders[f][b] == true betyr ubetjent bestilling i etasje f for knapp b
-// f: 0..N_FLOORS-1, b: BUTTON_HALL_UP / BUTTON_HALL_DOWN / BUTTON_CAB
 static bool orders[N_FLOORS][N_BUTTONS];
 
-// Hjelpefunksjon: er en hall-knapp gyldig i etasjen?
 static bool is_valid_hall_button(int floor, ButtonType btn){
-    if(btn == BUTTON_HALL_UP){
-        return floor < (N_FLOORS - 1);
-    }
-    if(btn == BUTTON_HALL_DOWN){
-        return floor > 0;
-    }
-    return 1; // cab alltid gyldig
+    if(btn == BUTTON_HALL_UP)   return floor < (N_FLOORS - 1);
+    if(btn == BUTTON_HALL_DOWN) return floor > 0;
+    return true; // cab alltid gyldig
 }
 
-// Hjelpefunksjon: finnes det noen ordre over/under en etasje?
 static bool any_above(int floor){
     for(int f = floor + 1; f < N_FLOORS; f++){
         for(int b = 0; b < N_BUTTONS; b++){
             if(orders[f][b]) return true;
         }
     }
-    return 0;
+    return false;
 }
 
 static bool any_below(int floor){
@@ -223,7 +214,6 @@ static bool any_here(int floor){
     return false;
 }
 
-// Finn nærmeste etasje (for DIRN_STOP tilfelle)
 static int nearest_order_floor(int currentFloor){
     int bestFloor = -1;
     int bestDist  = 999;
@@ -239,7 +229,6 @@ static int nearest_order_floor(int currentFloor){
     return bestFloor;
 }
 
-
 void orders_init(void){
     for(int f = 0; f < N_FLOORS; f++){
         for(int b = 0; b < N_BUTTONS; b++){
@@ -248,9 +237,17 @@ void orders_init(void){
     }
 }
 
+void orders_clear_all(void){
+    orders_init();
+}
 
-// Legg inn en bestilling
-// Returnerer false hvis ugyldig (f.eks. hall-up i øverste etasje).
+void orders_clear_at_floor(int floor){
+    if(floor < 0 || floor >= N_FLOORS) return;
+    for(int b = 0; b < N_BUTTONS; b++){
+        orders[floor][b] = false;
+    }
+}
+
 bool orders_add(int floor, ButtonType btn){
     if(floor < 0 || floor >= N_FLOORS) return false;
     if(btn < 0 || btn >= N_BUTTONS) return false;
@@ -261,8 +258,6 @@ bool orders_add(int floor, ButtonType btn){
     return true;
 }
 
-// Les knapper og legg inn ordre.
-// ignore == true: ignorer alle forsøk på bestilling (O2/S6).
 void orders_poll_buttons(bool ignore){
     if(ignore) return;
 
@@ -287,61 +282,31 @@ bool orders_any(void){
     return false;
 }
 
-// Oppdater lampene iht. (L1/L2)
-void orders_set_lamps(void){
-    for(int f = 0; f < N_FLOORS; f++){
-        for(int b = 0; b < N_BUTTONS; b++){
-            ButtonType btn = (ButtonType)b;
-
-            if(!is_valid_hall_button(f, btn)){
-                elevio_buttonLamp(f, btn, 0);
-                continue;
-            }
-            elevio_buttonLamp(f, btn, orders[f][btn] ? 1 : 0);
-        }
-    }
+bool orders_get(int floor, ButtonType btn){
+    if(floor < 0 || floor >= N_FLOORS) return false;
+    if(btn < 0 || btn >= N_BUTTONS) return false;
+    if(!is_valid_hall_button(floor, btn)) return false;
+    return orders[floor][btn];
 }
 
-// Når heisen stopper i en etasje: anta alle går av/på -> clear alle ordre i etasjen (H3)
-void orders_clear_at_floor(int floor){
-    if(floor < 0 || floor >= N_FLOORS) return;
-    for(int b = 0; b < N_BUTTONS; b++){
-        orders[floor][b] = false;
-    }
-}
-
-// Slett alle ordre (S5)
-void orders_clear_all(void){
-    orders_init();
-}
-
-// Skal vi stoppe i denne etasjen gitt retning?
-// H2: ikke betjen hall-bestillinger som peker motsatt retning mens du er i bevegelse
-// Cab-bestilling betjenes alltid.
 bool orders_should_stop(int floor, MotorDirection dir){
     if(floor < 0 || floor >= N_FLOORS) return false;
 
     // Cab: alltid stopp
     if(orders[floor][BUTTON_CAB]) return true;
 
-    // Står stille -> stopp hvis noe i etasjen (både hall_up/hall_down)
+    // Står stille -> stopp hvis noe i etasjen
     if(dir == DIRN_STOP){
         return orders[floor][BUTTON_HALL_UP] || orders[floor][BUTTON_HALL_DOWN];
     }
 
     if(dir == DIRN_UP){
-        // På vei opp:
-        // - stopp for hall_up
-        // - stopp for hall_down kun hvis det ikke finnes ordre over (da snur vi her)
         if(orders[floor][BUTTON_HALL_UP]) return true;
         if(orders[floor][BUTTON_HALL_DOWN] && !any_above(floor)) return true;
         return false;
     }
 
     if(dir == DIRN_DOWN){
-        // På vei ned:
-        // - stopp for hall_down
-        // - stopp for hall_up kun hvis det ikke finnes ordre under
         if(orders[floor][BUTTON_HALL_DOWN]) return true;
         if(orders[floor][BUTTON_HALL_UP] && !any_below(floor)) return true;
         return false;
@@ -350,23 +315,13 @@ bool orders_should_stop(int floor, MotorDirection dir){
     return false;
 }
 
-// Velg neste retning gitt nåværende etasje/retning.
-// Standard heislogikk:
-// - Fortsett i samme retning hvis det finnes ordre foran deg.
-// - Ellers snu hvis det finnes ordre motsatt vei.
-// - Ellers stopp. (H4)
 MotorDirection orders_next_dir(int currentFloor, MotorDirection currentDir){
     if(!orders_any()) return DIRN_STOP;
-
-    if(currentFloor < 0 || currentFloor >= N_FLOORS){
-        // Udefinert sensor -> velg noe trygt: stopp
-        return DIRN_STOP;
-    }
+    if(currentFloor < 0 || currentFloor >= N_FLOORS) return DIRN_STOP;
 
     if(currentDir == DIRN_UP){
         if(any_above(currentFloor)) return DIRN_UP;
         if(any_below(currentFloor)) return DIRN_DOWN;
-        // Ingen over/under, men kanskje i samme etasje:
         return DIRN_STOP;
     }
 
@@ -384,34 +339,27 @@ MotorDirection orders_next_dir(int currentFloor, MotorDirection currentDir){
     return DIRN_STOP;
 }
 
-// Finn “neste stopp-etasje” (praktisk for FSM).
-// Returnerer -1 hvis ingen ordre.
 int orders_next_stop_floor(int currentFloor, MotorDirection currentDir){
     if(!orders_any()) return -1;
     if(currentFloor < 0 || currentFloor >= N_FLOORS) return -1;
 
-    // Hvis vi allerede bør stoppe her:
     if(orders_should_stop(currentFloor, currentDir)) return currentFloor;
 
-    MotorDirection dir = currentDir;
-    if(dir == DIRN_STOP){
-        // Gå mot nærmeste ordre
+    if(currentDir == DIRN_STOP){
         return nearest_order_floor(currentFloor);
     }
 
-    if(dir == DIRN_UP){
+    if(currentDir == DIRN_UP){
         for(int f = currentFloor + 1; f < N_FLOORS; f++){
-            // Vi “planlegger” stopp som om vi fortsatt kjører opp
             if(orders_should_stop(f, DIRN_UP)) return f;
         }
-        // Ingen stopp oppover -> sjekk nedover (vi vil snu)
         for(int f = currentFloor - 1; f >= 0; f--){
             if(orders_should_stop(f, DIRN_DOWN)) return f;
         }
         return -1;
     }
 
-    if(dir == DIRN_DOWN){
+    if(currentDir == DIRN_DOWN){
         for(int f = currentFloor - 1; f >= 0; f--){
             if(orders_should_stop(f, DIRN_DOWN)) return f;
         }
