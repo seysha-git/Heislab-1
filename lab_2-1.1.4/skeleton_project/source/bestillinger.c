@@ -1,186 +1,425 @@
-// Lage et set som tar inn bestillinger fra knapper
-// Dersom noen skal opp, legges dere etasje i et set
-// Dersom noen skal ned, legges deres etasje * -1 i samme set
+// #include "bestillinger.h"
 
-// Sender heis til nærmeste etasje i retning heisen er på vei hvor det er lagt inn bestilling
 
-// Skal finne neste etasje som skal hente opp folk
+// void outside_addtoorders(int outsideorders[], int floor, ButtonType btn){
+//     if(btn == 0){
+//         switch (floor)
+//         {
+//         case 1:
+//             outsideorders[0] == 1;
+//             break;
+//         case 2:
+//             outsideorders[2] == 1;
+//             break;
+//         case 3: 
+//             outsideorders[4] == 1;
+//         default:
+//             break;
+//         }}
+//     if (btn == 1){
+//         switch (floor)
+//         {
+//         case 1:
+//             outsideorders[1] == 1;
+//             break;
+//         case 2:
+//             outsideorders[3] == 1;
+//             break;
+//         case 3: 
+//             outsideorders[5] == 1;
+//         default:
+//             break;
+//         }
+//     }
+//     return;
+// }
 
-// Om utfører bestilling: må først gjøre ferdig bestillingen (dra opp eller ned én etasje), deretter gå til neste etasje
-// Må sjekke om etasjen er den man skal til i bestillingen
+// void outside_ordercomplete(int outsideorders[], int floor, MotorDirection dir){
+//     if(dir == -1){
+//         switch (floor)
+//         {
+//         case 1:
+//             outsideorders[0] == 0;
+//             break;
+//         case 2:
+//             outsideorders[2] == 0;
+//             break;
+//         case 3: 
+//             outsideorders[4] == 0;
+//         default:
+//             break;
+//         }}
+//     if (dir == -1){
+//         switch (floor)
+//         {
+//         case 1:
+//             outsideorders[1] == 0;
+//             break;
+//         case 2:
+//             outsideorders[3] == 0;
+//             break;
+//         case 3: 
+//             outsideorders[5] == 0;
+//         default:
+//             break;
+//         }
+//     }
+//     return;
+// }
 
-#include "bestillinger.h"
+// void inside_addtoorders(int insideorders[], int floor){
+//     insideorders[floor] = 1;
+// }
 
-void outside_addtoorders(int outsideorders[], int floor, ButtonType btn){
-    if(btn == 0){
-        switch (floor)
-        {
-        case 1:
-            outsideorders[0] == 1;
-            break;
-        case 2:
-            outsideorders[2] == 1;
-            break;
-        case 3: 
-            outsideorders[4] == 1;
-        default:
-            break;
-        }}
-    if (btn == 1){
-        switch (floor)
-        {
-        case 1:
-            outsideorders[1] == 1;
-            break;
-        case 2:
-            outsideorders[3] == 1;
-            break;
-        case 3: 
-            outsideorders[5] == 1;
-        default:
-            break;
-        }
-    }
-    return;
-}
+// int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[], int insideorders[]){
+//     int targetfloorout;
+//     int nextfloorout, nextfloorin = 0;
+//     int nextfloor = currentfloor;
+//     int emptylistout[6];
+//     int emptylistin[4];
 
-void outside_ordercomplete(int outsideorders[], int floor, MotorDirection dir){
-    if(dir == -1){
-        switch (floor)
-        {
-        case 1:
-            outsideorders[0] == 0;
-            break;
-        case 2:
-            outsideorders[2] == 0;
-            break;
-        case 3: 
-            outsideorders[4] == 0;
-        default:
-            break;
-        }}
-    if (dir == -1){
-        switch (floor)
-        {
-        case 1:
-            outsideorders[1] == 0;
-            break;
-        case 2:
-            outsideorders[3] == 0;
-            break;
-        case 3: 
-            outsideorders[5] == 0;
-        default:
-            break;
-        }
-    }
-    return;
-}
-
-void inside_addtoorders(int insideorders[], int floor){
-    insideorders[floor] = 1;
-}
-
-int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[], int insideorders[]){
-    int targetfloorout;
-    int nextfloorout, nextfloorin = 0;
-    int nextfloor = currentfloor;
-    int emptylistout[6];
-    int emptylistin[4];
-
-    // sjekk om listene er tomme
-    if(outsideorders == emptylistout && insideorders == emptylistin){return currentfloor;}
+//     // sjekk om listene er tomme
+//     if(outsideorders == emptylistout && insideorders == emptylistin){return currentfloor;}
 
     
-    // finn neste etasje fra knapp som trykkes utenfor heisen
-    for(int i = 0 ; i<=5; i++) {
-        if(i == 0){targetfloorout = 1;}
-        if(i == 1 || i == 2){targetfloorout = 2;}
-        if(i == 3 || i == 4){targetfloorout = 3;}
-        if(i == 5){targetfloorout = 5;}
-        switch (motordir)
-        {
-        case -1: 
-            if(targetfloorout <= currentfloor){
-                if ((outsideorders[i] == 1) && (targetfloorout > nextfloorout)){nextfloorout = targetfloorout;}
-            }                    
-            break;
-        case 0:
-            if(targetfloorout == currentfloor){return currentfloor}
-            if(outsideorders[i] == 1){
-                if(abs(currentfloor - targetfloorout) <= abs(currentfloor - nextfloorout)){
-                    nextfloorout = targetfloor;
-                }
-            };            
-            break;
-        case 1:
-            if(targetfloorout >= currentfloor){
-                if ((outsideorders[i] == 1) && (targetfloorout < nextfloorout)){nextfloorout = targetfloorout;}
-            }            
-            break;
-        default:
-            break;
-        }      
-    }
+//     // finn neste etasje fra knapp som trykkes utenfor heisen
+//     for(int i = 0 ; i<=5; i++) {
+//         if(i == 0){targetfloorout = 1;}
+//         if(i == 1 || i == 2){targetfloorout = 2;}
+//         if(i == 3 || i == 4){targetfloorout = 3;}
+//         if(i == 5){targetfloorout = 5;}
+//         switch (motordir)
+//         {
+//         case -1: 
+//             if(targetfloorout <= currentfloor){
+//                 if ((outsideorders[i] == 1) && (targetfloorout > nextfloorout)){nextfloorout = targetfloorout;}
+//             }                    
+//             break;
+//         case 0:
+//             if(targetfloorout == currentfloor){return currentfloor}
+//             if(outsideorders[i] == 1){
+//                 if(abs(currentfloor - targetfloorout) <= abs(currentfloor - nextfloorout)){
+//                     nextfloorout = targetfloor;
+//                 }
+//             };            
+//             break;
+//         case 1:
+//             if(targetfloorout >= currentfloor){
+//                 if ((outsideorders[i] == 1) && (targetfloorout < nextfloorout)){nextfloorout = targetfloorout;}
+//             }            
+//             break;
+//         default:
+//             break;
+//         }      
+//     }
 
-    //sjekker innsiden
-    for(int i = 1; i<=4; i++){
-    switch (motordir)
-    {
+//     //sjekker innsiden
+//     for(int i = 1; i<=4; i++){
+//     switch (motordir)
+//     {
     
-    case 1: 
-        if((insideorders[i] == 1) && (i < nextfloorin) && (i >= currentfloor)){nextfloorin = i;}
-        break;
-    case 0:
-        if(i == currentfloor){return currentfloor}
-        if((insideorders[i] == 1 && nextfloorin != currentfloor)){
-            if(abs(currentfloor-i) <= abs(currentfloor - nextfloorin)){nextfloorin = i;}
-        break;
-    case -1:
-        if((insideorders[i] == 1) && (i > nextfloorin) && (i <= currentfloor)){nextfloorin = i;}
-        break;
+//     case 1: 
+//         if((insideorders[i] == 1) && (i < nextfloorin) && (i >= currentfloor)){nextfloorin = i;}
+//         break;
+//     case 0:
+//         if(i == currentfloor){return currentfloor}
+//         if((insideorders[i] == 1 && nextfloorin != currentfloor)){
+//             if(abs(currentfloor-i) <= abs(currentfloor - nextfloorin)){nextfloorin = i;}
+//         break;
+//     case -1:
+//         if((insideorders[i] == 1) && (i > nextfloorin) && (i <= currentfloor)){nextfloorin = i;}
+//         break;
     
-    default:
-        break;
-    }}
+//     default:
+//         break;
+//     }}
 
 
-    if(nextfloorout-nextfloorin <= 0){
-        nextfloor = nextfloorout;
+//     if(nextfloorout-nextfloorin <= 0){
+//         nextfloor = nextfloorout;
+//     }
+//     if(nextfloorout - nextfloorin > 0){
+//         nextfloor = nextfloorin;
+//     }
+
+//     return nextfloor;
+// }
+
+// void switch_dir_check(int outsideorders[], int insideorders[], int currentfloor, MotorDirection dir){
+//     int onitswayto[4];
+//     switch (dir)
+//     {
+//     case -1:
+//         if(outsideorders[0] == 1 || insideorders[0] = 1){onitswayto[0] = 1}
+//         if(outsideorders[2] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
+//         if(outsideorders[4] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
+//         for(int i = 0; i<=currentfloor-1; i++){
+//             if(onitsway[i] == 1){return;}
+//             dir = 1;
+//             return;
+//         }
+//         break;
+//     case 1:
+//         if(outsideorders[1] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
+//         if(outsideorders[3] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
+//         if(outsideorders[5] == 1 || insideorders[3] = 1){onitswayto[3] = 1}
+//         for(int i = 5; i>=currentfloor-1; i--){
+//             if(onitsway[i] == 1){return;}
+//             dir = -1;
+//             return;
+//         }
+//     default:
+//         break;
+//     } 
+
+
+// }
+
+
+#include <stdbool.h>
+#include <stdlib.h>     // abs
+#include "driver/elevio.h"
+
+// Intern ordretilstand
+// ---------------------------
+// orders[f][b] == true betyr ubetjent bestilling i etasje f for knapp b
+// f: 0..N_FLOORS-1, b: BUTTON_HALL_UP / BUTTON_HALL_DOWN / BUTTON_CAB
+static bool orders[N_FLOORS][N_BUTTONS];
+
+// Hjelpefunksjon: er en hall-knapp gyldig i etasjen?
+static bool is_valid_hall_button(int floor, ButtonType btn){
+    if(btn == BUTTON_HALL_UP){
+        return floor < (N_FLOORS - 1);
     }
-    if(nextfloorout - nextfloorin > 0){
-        nextfloor = nextfloorin;
+    if(btn == BUTTON_HALL_DOWN){
+        return floor > 0;
     }
-
-    return nextfloor;
+    return 1; // cab alltid gyldig
 }
 
-void switch_dir_check(int outsideorders[], int insideorders[], int currentfloor, MotorDirection dir){
-    int onitswayto[4];
-    switch (dir)
-    {
-    case -1:
-        if(outsideorders[0] == 1 || insideorders[0] = 1){onitswayto[0] = 1}
-        if(outsideorders[2] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
-        if(outsideorders[4] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
-        for(int i = 0; i<=currentfloor-1; i++){
-            if(onitsway[i] == 1){return;}
-            dir = 1;
-            return;
+// Hjelpefunksjon: finnes det noen ordre over/under en etasje?
+static bool any_above(int floor){
+    for(int f = floor + 1; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            if(orders[f][b]) return true;
         }
-        break;
-    case 1:
-        if(outsideorders[1] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
-        if(outsideorders[3] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
-        if(outsideorders[5] == 1 || insideorders[3] = 1){onitswayto[3] = 1}
-        for(int i = 5; i>=currentfloor-1; i--){
-            if(onitsway[i] == 1){return;}
-            dir = -1;
-            return;
+    }
+    return 0;
+}
+
+static bool any_below(int floor){
+    for(int f = 0; f < floor; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            if(orders[f][b]) return true;
         }
-    default:
-        break;
-    } 
+    }
+    return false;
+}
+
+static bool any_here(int floor){
+    for(int b = 0; b < N_BUTTONS; b++){
+        if(orders[floor][b]) return true;
+    }
+    return false;
+}
+
+// Finn nærmeste etasje (for DIRN_STOP tilfelle)
+static int nearest_order_floor(int currentFloor){
+    int bestFloor = -1;
+    int bestDist  = 999;
+
+    for(int f = 0; f < N_FLOORS; f++){
+        if(!any_here(f)) continue;
+        int d = abs(currentFloor - f);
+        if(d < bestDist){
+            bestDist = d;
+            bestFloor = f;
+        }
+    }
+    return bestFloor;
+}
 
 
+void orders_init(void){
+    for(int f = 0; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            orders[f][b] = false;
+        }
+    }
+}
+
+
+// Legg inn en bestilling
+// Returnerer false hvis ugyldig (f.eks. hall-up i øverste etasje).
+bool orders_add(int floor, ButtonType btn){
+    if(floor < 0 || floor >= N_FLOORS) return false;
+    if(btn < 0 || btn >= N_BUTTONS) return false;
+
+    if(!is_valid_hall_button(floor, btn)) return false;
+
+    orders[floor][btn] = true;
+    return true;
+}
+
+// Les knapper og legg inn ordre.
+// ignore == true: ignorer alle forsøk på bestilling (O2/S6).
+void orders_poll_buttons(bool ignore){
+    if(ignore) return;
+
+    for(int f = 0; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            ButtonType btn = (ButtonType)b;
+            if(!is_valid_hall_button(f, btn)) continue;
+
+            if(elevio_callButton(f, btn)){
+                orders[f][btn] = true;
+            }
+        }
+    }
+}
+
+bool orders_any(void){
+    for(int f = 0; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            if(orders[f][b]) return true;
+        }
+    }
+    return false;
+}
+
+// Oppdater lampene iht. (L1/L2)
+void orders_set_lamps(void){
+    for(int f = 0; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            ButtonType btn = (ButtonType)b;
+
+            if(!is_valid_hall_button(f, btn)){
+                elevio_buttonLamp(f, btn, 0);
+                continue;
+            }
+            elevio_buttonLamp(f, btn, orders[f][btn] ? 1 : 0);
+        }
+    }
+}
+
+// Når heisen stopper i en etasje: anta alle går av/på -> clear alle ordre i etasjen (H3)
+void orders_clear_at_floor(int floor){
+    if(floor < 0 || floor >= N_FLOORS) return;
+    for(int b = 0; b < N_BUTTONS; b++){
+        orders[floor][b] = false;
+    }
+}
+
+// Slett alle ordre (S5)
+void orders_clear_all(void){
+    orders_init();
+}
+
+// Skal vi stoppe i denne etasjen gitt retning?
+// H2: ikke betjen hall-bestillinger som peker motsatt retning mens du er i bevegelse
+// Cab-bestilling betjenes alltid.
+bool orders_should_stop(int floor, MotorDirection dir){
+    if(floor < 0 || floor >= N_FLOORS) return false;
+
+    // Cab: alltid stopp
+    if(orders[floor][BUTTON_CAB]) return true;
+
+    // Står stille -> stopp hvis noe i etasjen (både hall_up/hall_down)
+    if(dir == DIRN_STOP){
+        return orders[floor][BUTTON_HALL_UP] || orders[floor][BUTTON_HALL_DOWN];
+    }
+
+    if(dir == DIRN_UP){
+        // På vei opp:
+        // - stopp for hall_up
+        // - stopp for hall_down kun hvis det ikke finnes ordre over (da snur vi her)
+        if(orders[floor][BUTTON_HALL_UP]) return true;
+        if(orders[floor][BUTTON_HALL_DOWN] && !any_above(floor)) return true;
+        return false;
+    }
+
+    if(dir == DIRN_DOWN){
+        // På vei ned:
+        // - stopp for hall_down
+        // - stopp for hall_up kun hvis det ikke finnes ordre under
+        if(orders[floor][BUTTON_HALL_DOWN]) return true;
+        if(orders[floor][BUTTON_HALL_UP] && !any_below(floor)) return true;
+        return false;
+    }
+
+    return false;
+}
+
+// Velg neste retning gitt nåværende etasje/retning.
+// Standard heislogikk:
+// - Fortsett i samme retning hvis det finnes ordre foran deg.
+// - Ellers snu hvis det finnes ordre motsatt vei.
+// - Ellers stopp. (H4)
+MotorDirection orders_next_dir(int currentFloor, MotorDirection currentDir){
+    if(!orders_any()) return DIRN_STOP;
+
+    if(currentFloor < 0 || currentFloor >= N_FLOORS){
+        // Udefinert sensor -> velg noe trygt: stopp
+        return DIRN_STOP;
+    }
+
+    if(currentDir == DIRN_UP){
+        if(any_above(currentFloor)) return DIRN_UP;
+        if(any_below(currentFloor)) return DIRN_DOWN;
+        // Ingen over/under, men kanskje i samme etasje:
+        return DIRN_STOP;
+    }
+
+    if(currentDir == DIRN_DOWN){
+        if(any_below(currentFloor)) return DIRN_DOWN;
+        if(any_above(currentFloor)) return DIRN_UP;
+        return DIRN_STOP;
+    }
+
+    // DIRN_STOP: velg retning mot nærmeste ordre
+    int target = nearest_order_floor(currentFloor);
+    if(target < 0) return DIRN_STOP;
+    if(target > currentFloor) return DIRN_UP;
+    if(target < currentFloor) return DIRN_DOWN;
+    return DIRN_STOP;
+}
+
+// Finn “neste stopp-etasje” (praktisk for FSM).
+// Returnerer -1 hvis ingen ordre.
+int orders_next_stop_floor(int currentFloor, MotorDirection currentDir){
+    if(!orders_any()) return -1;
+    if(currentFloor < 0 || currentFloor >= N_FLOORS) return -1;
+
+    // Hvis vi allerede bør stoppe her:
+    if(orders_should_stop(currentFloor, currentDir)) return currentFloor;
+
+    MotorDirection dir = currentDir;
+    if(dir == DIRN_STOP){
+        // Gå mot nærmeste ordre
+        return nearest_order_floor(currentFloor);
+    }
+
+    if(dir == DIRN_UP){
+        for(int f = currentFloor + 1; f < N_FLOORS; f++){
+            // Vi “planlegger” stopp som om vi fortsatt kjører opp
+            if(orders_should_stop(f, DIRN_UP)) return f;
+        }
+        // Ingen stopp oppover -> sjekk nedover (vi vil snu)
+        for(int f = currentFloor - 1; f >= 0; f--){
+            if(orders_should_stop(f, DIRN_DOWN)) return f;
+        }
+        return -1;
+    }
+
+    if(dir == DIRN_DOWN){
+        for(int f = currentFloor - 1; f >= 0; f--){
+            if(orders_should_stop(f, DIRN_DOWN)) return f;
+        }
+        for(int f = currentFloor + 1; f < N_FLOORS; f++){
+            if(orders_should_stop(f, DIRN_UP)) return f;
+        }
+        return -1;
+    }
+
+    return -1;
 }
