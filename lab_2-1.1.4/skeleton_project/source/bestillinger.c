@@ -12,18 +12,73 @@
 #include "bestillinger.h"
 
 void outside_addtoorders(int outsideorders[], int floor, ButtonType btn){
-    if(btn == 1){
-        outsideorders[floor*2]
+    if(btn == 0){
+        switch (floor)
+        {
+        case 1:
+            outsideorders[0] == 1;
+            break;
+        case 2:
+            outsideorders[2] == 1;
+            break;
+        case 3: 
+            outsideorders[4] == 1;
+        default:
+            break;
+        }}
+    if (btn == 1){
+        switch (floor)
+        {
+        case 1:
+            outsideorders[1] == 1;
+            break;
+        case 2:
+            outsideorders[3] == 1;
+            break;
+        case 3: 
+            outsideorders[5] == 1;
+        default:
+            break;
+        }
     }
     return;
 }
 
-void outside_ordercomplete(int outsideorders[], int floor){
-    outsideorders[floor-1] = 0;
+void outside_ordercomplete(int outsideorders[], int floor, MotorDirection dir){
+    if(dir == -1){
+        switch (floor)
+        {
+        case 1:
+            outsideorders[0] == 0;
+            break;
+        case 2:
+            outsideorders[2] == 0;
+            break;
+        case 3: 
+            outsideorders[4] == 0;
+        default:
+            break;
+        }}
+    if (dir == -1){
+        switch (floor)
+        {
+        case 1:
+            outsideorders[1] == 0;
+            break;
+        case 2:
+            outsideorders[3] == 0;
+            break;
+        case 3: 
+            outsideorders[5] == 0;
+        default:
+            break;
+        }
+    }
+    return;
 }
 
 void inside_addtoorders(int insideorders[], int floor){
-
+    insideorders[floor] = 1;
 }
 
 int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[], int insideorders[]){
@@ -100,3 +155,32 @@ int getnextfloor(MotorDirection motordir, int currentfloor, int outsideorders[],
     return nextfloor;
 }
 
+void switch_dir_check(int outsideorders[], int insideorders[], int currentfloor, MotorDirection dir){
+    int onitswayto[4];
+    switch (dir)
+    {
+    case -1:
+        if(outsideorders[0] == 1 || insideorders[0] = 1){onitswayto[0] = 1}
+        if(outsideorders[2] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
+        if(outsideorders[4] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
+        for(int i = 0; i<=currentfloor-1; i++){
+            if(onitsway[i] == 1){return;}
+            dir = 1;
+            return;
+        }
+        break;
+    case 1:
+        if(outsideorders[1] == 1 || insideorders[1] = 1){onitswayto[1] = 1}
+        if(outsideorders[3] == 1 || insideorders[2] = 1){onitswayto[2] = 1}
+        if(outsideorders[5] == 1 || insideorders[3] = 1){onitswayto[3] = 1}
+        for(int i = 5; i>=currentfloor-1; i--){
+            if(onitsway[i] == 1){return;}
+            dir = -1;
+            return;
+        }
+    default:
+        break;
+    } 
+
+
+}
